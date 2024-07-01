@@ -14,7 +14,7 @@ pub fn serve() -> Result<(), HttpErrors> {
     info!("HTTP server online, open for connections on port: {PORT}");
 
     for stream in listener.incoming() {
-        let mut stream = match stream {
+        let mut stream = match stream.map_err(|e| HttpErrors::StreamAcceptFailure(e.to_string())) {
             Ok(s) => s,
             Err(e) => {
                 error!("{e}");
@@ -23,7 +23,7 @@ pub fn serve() -> Result<(), HttpErrors> {
         };
 
         let mut buf = [0; 1024];
-        let bytes_read = match stream.read(&mut buf) {
+        let bytes_read = match stream.read(&mut buf).map_err(|e| HttpErrors::StreamReadFailure(e.to_string())) {
             Ok(r) => r,
             Err(e) => {
                 error!("{e}");
@@ -31,7 +31,7 @@ pub fn serve() -> Result<(), HttpErrors> {
             }
         };
 
-        let request = match from_utf8(&buf[..bytes_read]) {
+        let request = match from_utf8(&buf[..bytes_read]).map_err(|_| HttpErrors::Utf8ConversionFailure) {
             Ok(r) => r,
             Err(e) => {
                 error!("{e}");
@@ -40,8 +40,7 @@ pub fn serve() -> Result<(), HttpErrors> {
         };
 
         if bytes_read == 0 {
-            error!("Reading client data failed, fatal error, exiting...");
-            return Ok(());
+            return Err(HttpErrors::StreamReadFailure(String::from("Received 0 bytes, unknown")));
         }
 
         match handle_request(request, &mut stream) {

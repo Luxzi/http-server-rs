@@ -7,6 +7,9 @@ pub enum HttpErrors {
     #[error("Failed to bind TcpListener to port `{0}`: `{1}`")]
     TcpListenerBindFailure(String, String),
 
+    #[error("Failed to accept incoming TcpStream: `{0}`")]
+    StreamAcceptFailure(String),
+
     #[error("Failed to read TcpStream with error: `{0}`")]
     StreamReadFailure(String),
 
