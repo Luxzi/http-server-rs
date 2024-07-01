@@ -18,3 +18,14 @@ Development build:<br/>
 
 Release build:<br/>
 `cargo build --release`
+
+## Roadmap
+
+- [x] Send and receive requests
+- [x] Minimal external library usage
+- [x] Readable and fault-proof codebase
+- [ ] Configuration system
+- [ ] More efficient request handling
+    - [ ] Multi-threading
+    - [ ] Async
+- [ ] HTTP 1.1 compliance?
