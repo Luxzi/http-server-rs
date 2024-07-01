@@ -98,18 +98,22 @@ fn get(request_url: String, ext: String) -> Result<HttpResponse, HttpErrors> {
         content,
     })
 }
-
+// TODO: Implement POST request
 fn post(_request_url: String, _ext: String) -> Result<HttpResponse, HttpErrors> {
     not_impl()
 }
 
+// TODO: Implement PATCH request
 fn patch(_request_url: String, _ext: String) -> Result<HttpResponse, HttpErrors> {
     not_impl()
 }
 
+// TODO: Implement PUT request
 fn put(_request_url: String, _ext: String) -> Result<HttpResponse, HttpErrors> {
     not_impl()
 }
+
+// TODO: Implement DELETE request
 fn delete(_request_url: String, _ext: String) -> Result<HttpResponse, HttpErrors> {
     not_impl()
 }

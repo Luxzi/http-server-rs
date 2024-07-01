@@ -32,6 +32,7 @@ macro_rules! content_types {
     };
 }
 
+// TODO: Add more MIME types
 content_types!(
     "text" / "plain" "txt" TXT;
     "text" / "html" "html" HTML;

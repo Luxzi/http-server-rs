@@ -150,6 +150,7 @@ macro_rules! status_code_string {
     };
 }
 
+// TODO: Add more status codes
 status_codes!(
     /// 200 OK
     (200, OK, "OK");
