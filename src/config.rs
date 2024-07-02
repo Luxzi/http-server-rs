@@ -17,10 +17,21 @@ pub struct ServerConfig {
     pub address: String,
     pub port: String,
     pub root: String,
+    pub threading: ServerThreadingConfig,
+    pub async_: ServerAsyncConfig,
 }
 
-pub struct ServerThreadingConfig {}
-pub struct ServerAsyncConfig {}
+#[derive(Deserialize)]
+pub struct ServerThreadingConfig {
+    pub enable: bool,
+    pub max_threads: u32,
+}
+
+#[derive(Deserialize)]
+pub struct ServerAsyncConfig {
+    pub enable: bool,
+    pub max_tasks: u32,
+}
 
 #[derive(Deserialize)]
 pub struct LoggingConfig {
@@ -32,7 +43,6 @@ pub struct LoggingConfig {
 #[derive(Deserialize)]
 pub struct ExtraConfig {
     pub panic_if_not_impl: bool,
-    pub panic_on_error:  bool,
 }
 
 pub fn parse() -> Result<Config, HttpErrors>  {

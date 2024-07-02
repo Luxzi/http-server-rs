@@ -12,11 +12,11 @@ use crate::headers::{
 
 use crate::media::ext_to_type;
 
-pub fn handle_request(request: &str, stream: &mut TcpStream, config: Config) -> Result<(), HttpErrors> {
+pub fn handle_request(request: &str, stream: &mut TcpStream, config: &Config) -> Result<(), HttpErrors> {
     let request_sections = request.split_whitespace().collect::<Vec<&str>>();
     let request_type = request_sections[0];
     let request_url = to_local_path(request_sections[1]);
-    let request_ext = request_url.split(".").last();
+    let request_ext = request_url.split('.').last();
     let ext = if request_ext.is_some() {
         String::from(request_ext.unwrap())
     } else {
@@ -25,12 +25,12 @@ pub fn handle_request(request: &str, stream: &mut TcpStream, config: Config) -> 
 
     info!("Received {request_type} request from {:#?}", stream.peer_addr().map_err(|e| HttpErrors::StreamPeerAddressUnknown(e.to_string()))?);
     let response = match request_type {
-        "GET" => get(request_url, ext, config),
+        "GET" => get(request_url, ext),
         "POST" => post(request_url, ext, config),
         "PATCH" => patch(request_url, ext, config),
         "PUT" => put(request_url, ext, config),
         "DELETE" => delete(request_url, ext, config),
-        _ => return Err(HttpErrors::UnsupportedRequestType(request_type.to_string()).into()),
+        _ => return Err(HttpErrors::UnsupportedRequestType(request_type.to_string())),
     }?;
 
     stream
@@ -47,7 +47,7 @@ pub fn handle_request(request: &str, stream: &mut TcpStream, config: Config) -> 
     Ok(())
 }
 
-fn get(request_url: String, ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+fn get(request_url: String, ext: String) -> Result<HttpResponse, HttpErrors> {
     let mut status_code = 200;
     let mut ext = ext;
     let mut content_buffer = vec![];
@@ -100,22 +100,22 @@ fn get(request_url: String, ext: String, config: Config) -> Result<HttpResponse,
     })
 }
 // TODO: Implement POST request
-fn post(_request_url: String, _ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+fn post(_request_url: String, _ext: String, config: &Config) -> Result<HttpResponse, HttpErrors> {
     not_impl(config)
 }
 
 // TODO: Implement PATCH request
-fn patch(_request_url: String, _ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+fn patch(_request_url: String, _ext: String, config: &Config) -> Result<HttpResponse, HttpErrors> {
     not_impl(config)
 }
 
 // TODO: Implement PUT request
-fn put(_request_url: String, _ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+fn put(_request_url: String, _ext: String, config: &Config) -> Result<HttpResponse, HttpErrors> {
     not_impl(config)
 }
 
 // TODO: Implement DELETE request
-fn delete(_request_url: String, _ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+fn delete(_request_url: String, _ext: String, config: &Config) -> Result<HttpResponse, HttpErrors> {
     not_impl(config)
 }
 
@@ -124,12 +124,12 @@ fn to_local_path(path: &str) -> String {
 }
 
 fn get_file(path: &str) -> Result<fs::File, HttpErrors> {
-    if path.find("..").is_some() {
-        return Err(HttpErrors::UnauthorizedPath(path.to_string()).into());
+    if path.contains("..") {
+        return Err(HttpErrors::UnauthorizedPath(path.to_string()));
     }
 
     if !std::path::PathBuf::from(path).exists() {
-        return Err(HttpErrors::ResourceNotFound(path.to_string()).into());
+        return Err(HttpErrors::ResourceNotFound(path.to_string()));
     }
 
     let file = fs::File::open(path).map_err(|e| HttpErrors::FileReadFailure(e.to_string()))?;
@@ -137,7 +137,7 @@ fn get_file(path: &str) -> Result<fs::File, HttpErrors> {
     Ok(file)
 }
 
-fn not_impl(config: Config) -> Result<HttpResponse, HttpErrors> {
+fn not_impl(config: &Config) -> Result<HttpResponse, HttpErrors> {
     if config.extra.panic_if_not_impl {
         panic!();
     }

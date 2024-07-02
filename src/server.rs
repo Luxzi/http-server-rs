@@ -9,7 +9,7 @@ use std::{
 };
 
 pub fn serve(config: Config) -> Result<(), HttpErrors> {
-    let listener: TcpListener = TcpListener::bind(&format!("{}:{}", config.server.address, config.server.port)).map_err(|e| HttpErrors::TcpListenerBindFailure(config.server.port.clone(), e.to_string()))?;
+    let listener: TcpListener = TcpListener::bind(format!("{}:{}", config.server.address, config.server.port)).map_err(|e| HttpErrors::TcpListenerBindFailure(config.server.port.clone(), e.to_string()))?;
     info!("HTTP server online, open for connections on port: {}", config.server.port);
 
     for stream in listener.incoming() {
@@ -42,7 +42,7 @@ pub fn serve(config: Config) -> Result<(), HttpErrors> {
             return Err(HttpErrors::StreamReadFailure(String::from("Received 0 bytes, unknown")));
         }
 
-        match handle_request(request, &mut stream, config) {
+        match handle_request(request, &mut stream, &config) {
             Ok(_) => (),
             Err(e) => {
                 error!("{e}");

@@ -24,7 +24,7 @@ Release build:<br/>
 - [x] Send and receive requests
 - [x] Minimal external library usage
 - [x] Readable and fault-proof codebase
-- [ ] Configuration system
+- [x] Configuration system
 - [ ] More efficient request handling
     - [ ] Multi-threading
     - [ ] Async
