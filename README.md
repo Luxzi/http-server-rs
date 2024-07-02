@@ -28,4 +28,4 @@ Release build:<br/>
 - [ ] More efficient request handling
     - [ ] Multi-threading
     - [ ] Async
-- ~~[ ] HTTP 1.1 compliance?~~ Scrapped.
+- [ ] ~~HTTP 1.1 compliance?~~ Scrapped.
