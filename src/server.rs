@@ -1,4 +1,5 @@
 use crate::errors::HttpErrors;
+use crate::config::Config;
 use crate::requests::handle_request;
 use log::{error, info};
 use std::{
@@ -7,11 +8,9 @@ use std::{
     str::from_utf8,
 };
 
-const PORT: u16 = 80;
-
-pub fn serve() -> Result<(), HttpErrors> {
-    let listener: TcpListener = TcpListener::bind(&format!("[::]:{PORT}")).map_err(|e| HttpErrors::TcpListenerBindFailure(PORT.to_string(), e.to_string()))?;
-    info!("HTTP server online, open for connections on port: {PORT}");
+pub fn serve(config: Config) -> Result<(), HttpErrors> {
+    let listener: TcpListener = TcpListener::bind(&format!("{}:{}", config.server.address, config.server.port)).map_err(|e| HttpErrors::TcpListenerBindFailure(config.server.port.clone(), e.to_string()))?;
+    info!("HTTP server online, open for connections on port: {}", config.server.port);
 
     for stream in listener.incoming() {
         let mut stream = match stream.map_err(|e| HttpErrors::StreamAcceptFailure(e.to_string())) {
@@ -43,7 +42,7 @@ pub fn serve() -> Result<(), HttpErrors> {
             return Err(HttpErrors::StreamReadFailure(String::from("Received 0 bytes, unknown")));
         }
 
-        match handle_request(request, &mut stream) {
+        match handle_request(request, &mut stream, config) {
             Ok(_) => (),
             Err(e) => {
                 error!("{e}");

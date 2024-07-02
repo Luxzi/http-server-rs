@@ -48,4 +48,10 @@ pub enum HttpErrors {
 
     #[error("Failed to read file: `{0}`")]
     FileReadFailure(String),
+
+    #[error("Failed to read configuration file: `{0}`")]
+    ConfigReadFailure(String),
+
+    #[error("Failed to parse configuration file, it may be formatted incorrectly. Please read the README: `{0}`")]
+    ConfigParseFailure(String),
 }

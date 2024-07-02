@@ -3,6 +3,7 @@ use std::io::Read;
 use std::{io::Write, net::TcpStream};
 use fs_err as fs;
 
+use crate::config::Config;
 use crate::errors::HttpErrors;
 use crate::{headers, status_code_string};
 use crate::headers::{
@@ -11,7 +12,7 @@ use crate::headers::{
 
 use crate::media::ext_to_type;
 
-pub fn handle_request(request: &str, stream: &mut TcpStream) -> Result<(), HttpErrors> {
+pub fn handle_request(request: &str, stream: &mut TcpStream, config: Config) -> Result<(), HttpErrors> {
     let request_sections = request.split_whitespace().collect::<Vec<&str>>();
     let request_type = request_sections[0];
     let request_url = to_local_path(request_sections[1]);
@@ -24,11 +25,11 @@ pub fn handle_request(request: &str, stream: &mut TcpStream) -> Result<(), HttpE
 
     info!("Received {request_type} request from {:#?}", stream.peer_addr().map_err(|e| HttpErrors::StreamPeerAddressUnknown(e.to_string()))?);
     let response = match request_type {
-        "GET" => get(request_url, ext),
-        "POST" => post(request_url, ext),
-        "PATCH" => patch(request_url, ext),
-        "PUT" => put(request_url, ext),
-        "DELETE" => delete(request_url, ext),
+        "GET" => get(request_url, ext, config),
+        "POST" => post(request_url, ext, config),
+        "PATCH" => patch(request_url, ext, config),
+        "PUT" => put(request_url, ext, config),
+        "DELETE" => delete(request_url, ext, config),
         _ => return Err(HttpErrors::UnsupportedRequestType(request_type.to_string()).into()),
     }?;
 
@@ -46,7 +47,7 @@ pub fn handle_request(request: &str, stream: &mut TcpStream) -> Result<(), HttpE
     Ok(())
 }
 
-fn get(request_url: String, ext: String) -> Result<HttpResponse, HttpErrors> {
+fn get(request_url: String, ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
     let mut status_code = 200;
     let mut ext = ext;
     let mut content_buffer = vec![];
@@ -99,23 +100,23 @@ fn get(request_url: String, ext: String) -> Result<HttpResponse, HttpErrors> {
     })
 }
 // TODO: Implement POST request
-fn post(_request_url: String, _ext: String) -> Result<HttpResponse, HttpErrors> {
-    not_impl()
+fn post(_request_url: String, _ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+    not_impl(config)
 }
 
 // TODO: Implement PATCH request
-fn patch(_request_url: String, _ext: String) -> Result<HttpResponse, HttpErrors> {
-    not_impl()
+fn patch(_request_url: String, _ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+    not_impl(config)
 }
 
 // TODO: Implement PUT request
-fn put(_request_url: String, _ext: String) -> Result<HttpResponse, HttpErrors> {
-    not_impl()
+fn put(_request_url: String, _ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+    not_impl(config)
 }
 
 // TODO: Implement DELETE request
-fn delete(_request_url: String, _ext: String) -> Result<HttpResponse, HttpErrors> {
-    not_impl()
+fn delete(_request_url: String, _ext: String, config: Config) -> Result<HttpResponse, HttpErrors> {
+    not_impl(config)
 }
 
 fn to_local_path(path: &str) -> String {
@@ -136,7 +137,11 @@ fn get_file(path: &str) -> Result<fs::File, HttpErrors> {
     Ok(file)
 }
 
-fn not_impl() -> Result<HttpResponse, HttpErrors> {
+fn not_impl(config: Config) -> Result<HttpResponse, HttpErrors> {
+    if config.extra.panic_if_not_impl {
+        panic!();
+    }
+
     let content = HttpContent { content: status_code_string!(NOT_IMPLEMENTED.code, NOT_IMPLEMENTED.phrase).as_bytes().to_vec() };
     Ok(HttpResponse {
         headers: headers!(
