@@ -1,0 +1,34 @@
+[server]
+# IP address to bind to. This will most likey be "0.0.0.0" otherwise known as localhost.
+# This can also be "[::]" which is the same as the former except that it is IPv6 instead of IPv4.
+address = "0.0.0.0"
+# Port to bind to. Since this server does not support TLS which is required for HTTPS,
+# it is recommended to use port 80; the standard for HTTP servers.
+port = "80"
+# Directory to limit request scope to. If you want this to be the same directory as the binary use "."
+# e.g. http://localhost/somefile.ext -> [root]/somefile.ext
+root = "."
+
+[server.threading]
+# Enable and disable threading
+enable = true
+# Maximum amount of threads allowed. Set to zero to disable limit.
+max_threads = 0
+
+[server.async]
+# Enable and disable async 
+enable = true
+# Maximum amount of tasks allowed. Set to zero to disable limit.
+max_tasks = 0
+
+[logging]
+# Default logging level to log at when none is provided by the user.
+default_level = "debug"
+# Logging level to log at when writing to the log file.
+log_file_level = "debug"
+# Location of the log file
+log_file = "./server.log"
+
+[extra]
+# Panic if something is not implemented instead of returning "501 Not Implemented".
+panic_if_not_impl = false
